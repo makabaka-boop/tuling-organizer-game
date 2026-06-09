@@ -11,6 +11,8 @@ import { useGameStore } from '../store/useGameStore';
 import { useTimer } from '../hooks/useTimer';
 import { Button } from '../components/ui/Button';
 import { AlertCircle } from 'lucide-react';
+import { getGameProgress, STORAGE_KEYS } from '../utils/storage';
+import { getLevelById } from '../data/levels';
 
 export const GamePage: React.FC = () => {
   const params = useParams<{ levelId: string }>();
@@ -23,14 +25,30 @@ export const GamePage: React.FC = () => {
 
   useEffect(() => {
     const levelId = Number(params.levelId);
-    if (!isNaN(levelId)) {
-      startGame(levelId);
+    if (isNaN(levelId)) {
+      navigate('/', { replace: true });
+      return;
     }
+
+    const level = getLevelById(levelId);
+    if (!level) {
+      navigate('/', { replace: true });
+      return;
+    }
+
+    const progress = getGameProgress(STORAGE_KEYS.PROGRESS);
+    if (!progress.unlockedLevels.includes(levelId)) {
+      alert('该关卡尚未解锁，请先完成前置关卡。');
+      navigate('/', { replace: true });
+      return;
+    }
+
+    startGame(levelId);
 
     return () => {
       resetGame();
     };
-  }, [params.levelId, startGame, resetGame]);
+  }, [params.levelId, startGame, resetGame, navigate]);
 
   useEffect(() => {
     if (currentLevel && timeRemaining <= 0 && isRunning && !hasNavigatedRef.current) {
@@ -102,21 +120,21 @@ export const GamePage: React.FC = () => {
       <EventToast />
       <PauseOverlay />
 
-      <main className="flex-1 p-4 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
-          <div className="lg:col-span-4 h-full min-h-0">
+      <main className="flex-1 p-4 overflow-y-auto lg:overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:h-full">
+          <div className="lg:col-span-4 lg:h-full lg:min-h-0 h-[70vh]">
             <BellList className="h-full" />
           </div>
 
-          <div className="lg:col-span-4 h-full min-h-0">
+          <div className="lg:col-span-4 lg:h-full lg:min-h-0 h-[70vh]">
             <SortableQueue className="h-full" />
           </div>
 
-          <div className="lg:col-span-4 flex flex-col gap-4 h-full min-h-0">
-            <div className="flex-1 min-h-0">
+          <div className="lg:col-span-4 flex flex-col gap-4 lg:h-full lg:min-h-0">
+            <div className="lg:flex-1 lg:min-h-0 h-[50vh]">
               <ReturnZone className="h-full" />
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="lg:flex-1 lg:min-h-0 h-[50vh]">
               <IsolationZone className="h-full" />
             </div>
           </div>

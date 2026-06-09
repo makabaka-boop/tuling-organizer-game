@@ -1,22 +1,31 @@
 import type { Bell, IsolationRecord, ScoreResult, Grade, ReviewSummary } from './types';
 
 export function calculateOrderAccuracy(bells: Bell[], queue: string[]): number {
+  // 分母：仍需要进入出场队列的土铃数量
+  // 排除：已停用、异常件（应隔离）、已归位（无法再进队列）、已隔离
+  const queuableBells = bells.filter(
+    b => !b.disabled && !b.isAbnormal && b.status !== 'returned' && b.status !== 'isolated'
+  );
+  const totalExpected = queuableBells.length;
+
+  if (totalExpected === 0) {
+    // 没有需要排序的土铃时，若队列也为空则视为满分
+    return queue.length === 0 ? 100 : 0;
+  }
+
   if (queue.length === 0) return 0;
 
-  let correctCount = 0;
+  // 按 correctPosition 升序得到期望队列顺序，比较 bellId 是否一致
+  const expectedOrder = [...queuableBells]
+    .sort((a, b) => a.correctPosition - b.correctPosition)
+    .map(b => b.id);
 
-  for (let i = 0; i < queue.length; i++) {
-    const bellId = queue[i];
-    const bell = bells.find(b => b.id === bellId);
-    if (bell && bell.correctPosition === i + 1) {
+  let correctCount = 0;
+  for (let i = 0; i < queue.length && i < expectedOrder.length; i++) {
+    if (queue[i] === expectedOrder[i]) {
       correctCount++;
     }
   }
-
-  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal);
-  const totalExpected = queuableBells.length;
-
-  if (totalExpected === 0) return 100;
 
   return Math.round((correctCount / totalExpected) * 100);
 }

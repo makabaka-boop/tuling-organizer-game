@@ -274,13 +274,19 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
 
       case 'disable':
         if (event.targetBellIds) {
+          const targetIds = event.targetBellIds;
           newBells = state.bells.map(b => {
-            if (event.targetBellIds!.includes(b.id)) {
-              return { ...b, disabled: true };
+            if (targetIds.includes(b.id)) {
+              const wasQueued = b.status === 'queued';
+              return {
+                ...b,
+                disabled: true,
+                status: wasQueued ? 'pending' as const : b.status,
+              };
             }
             return b;
           });
-          newQueue = state.queue.filter(id => !event.targetBellIds!.includes(id));
+          newQueue = state.queue.filter(id => !targetIds.includes(id));
         }
         break;
 
