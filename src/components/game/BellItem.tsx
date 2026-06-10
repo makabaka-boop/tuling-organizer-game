@@ -65,7 +65,7 @@ export const BellItem: React.FC<BellItemProps> = ({
   const getStatusBadge = () => {
     if (bell.disabled) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-grey-100 text-grey-600 text-xs rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded-full">
           <Ban className="w-3 h-3" />
           停用
         </span>

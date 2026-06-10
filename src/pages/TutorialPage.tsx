@@ -24,6 +24,7 @@ import {
 import { Button } from '../components/ui/Button';
 import { Card, CardHeader, CardContent, CardFooter } from '../components/ui/Card';
 import { cn } from '../lib/utils';
+import { getGameProgress, STORAGE_KEYS } from '../utils/storage';
 
 interface TutorialPoint {
   icon?: React.ElementType;
@@ -168,7 +169,11 @@ export const TutorialPage: React.FC = () => {
     if (currentStep < tutorialSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigate('/');
+      const progress = getGameProgress(STORAGE_KEYS.PROGRESS);
+      const targetLevel = progress.unlockedLevels.length > 0
+        ? Math.max(...progress.unlockedLevels)
+        : 1;
+      navigate(`/game/${targetLevel}`);
     }
   };
 
