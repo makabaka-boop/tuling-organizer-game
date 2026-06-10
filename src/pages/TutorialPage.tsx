@@ -168,7 +168,7 @@ export const TutorialPage: React.FC = () => {
     if (currentStep < tutorialSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigate('/');
+      navigate('/game/1');
     }
   };
 
