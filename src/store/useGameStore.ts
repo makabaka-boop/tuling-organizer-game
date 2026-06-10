@@ -276,7 +276,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
         if (event.targetBellIds) {
           newBells = state.bells.map(b => {
             if (event.targetBellIds!.includes(b.id)) {
-              return { ...b, disabled: true };
+              return { ...b, disabled: true, status: b.status === 'queued' ? 'pending' as const : b.status };
             }
             return b;
           });

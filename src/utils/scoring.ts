@@ -13,7 +13,7 @@ export function calculateOrderAccuracy(bells: Bell[], queue: string[]): number {
     }
   }
 
-  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal);
+  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal && b.status !== 'returned');
   const totalExpected = queuableBells.length;
 
   if (totalExpected === 0) return 100;
