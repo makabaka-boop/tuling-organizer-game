@@ -86,7 +86,7 @@ export const SortableQueue: React.FC<SortableQueueProps> = ({ className }) => {
     return bell ? { bell, position: index + 1 } : null;
   }).filter(Boolean) as { bell: typeof queuedBells[0]; position: number }[];
 
-  const expectedCount = bells.filter(b => !b.disabled && !b.isAbnormal).length;
+  const expectedCount = bells.filter(b => !b.disabled && !b.isAbnormal && !b.needReturn).length;
 
   return (
     <div

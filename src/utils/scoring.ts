@@ -1,22 +1,28 @@
 import type { Bell, IsolationRecord, ScoreResult, Grade, ReviewSummary } from './types';
 
 export function calculateOrderAccuracy(bells: Bell[], queue: string[]): number {
+  const queueableBells = bells.filter(b => !b.disabled && !b.isAbnormal && !b.needReturn);
+  const totalExpected = queueableBells.length;
+
+  if (totalExpected === 0) return 100;
   if (queue.length === 0) return 0;
 
-  let correctCount = 0;
+  const sortedExpected = [...queueableBells].sort((a, b) => a.correctPosition - b.correctPosition);
+  const expectedPositionMap = new Map<string, number>();
+  sortedExpected.forEach((bell, index) => {
+    expectedPositionMap.set(bell.id, index + 1);
+  });
 
-  for (let i = 0; i < queue.length; i++) {
-    const bellId = queue[i];
-    const bell = bells.find(b => b.id === bellId);
-    if (bell && bell.correctPosition === i + 1) {
+  let correctCount = 0;
+  const queueFiltered = queue.filter(id => expectedPositionMap.has(id));
+
+  for (let i = 0; i < queueFiltered.length; i++) {
+    const bellId = queueFiltered[i];
+    const expectedPos = expectedPositionMap.get(bellId);
+    if (expectedPos === i + 1) {
       correctCount++;
     }
   }
-
-  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal);
-  const totalExpected = queuableBells.length;
-
-  if (totalExpected === 0) return 100;
 
   return Math.round((correctCount / totalExpected) * 100);
 }

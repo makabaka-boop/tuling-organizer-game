@@ -65,7 +65,7 @@ export const BellItem: React.FC<BellItemProps> = ({
   const getStatusBadge = () => {
     if (bell.disabled) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-grey-100 text-grey-600 text-xs rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-grey-200 text-grey-700 text-xs rounded-full font-medium">
           <Ban className="w-3 h-3" />
           停用
         </span>
@@ -110,8 +110,8 @@ export const BellItem: React.FC<BellItemProps> = ({
         'bell-card p-3 transition-all duration-200',
         isDragging && 'opacity-50 scale-95',
         isSelected && 'ring-2 ring-clay-500 ring-offset-2',
-        bell.disabled && 'opacity-60',
-        bell.status !== 'pending' && bell.status !== 'queued' && 'opacity-70',
+        bell.disabled && 'opacity-60 bg-grey-100/80 border-grey-300',
+        bell.status !== 'pending' && bell.status !== 'queued' && !bell.disabled && 'opacity-70',
         draggable && bell.status === 'pending' && !bell.disabled && !bell.isAbnormal && 'cursor-grab active:cursor-grabbing',
         'hover:shadow-hover'
       )}
@@ -138,19 +138,22 @@ export const BellItem: React.FC<BellItemProps> = ({
           </div>
         )}
 
-        <div className="flex-shrink-0 w-10 h-10 bg-clay-100 rounded-lg flex items-center justify-center">
-          <Bell className="w-5 h-5 text-clay-600" />
+        <div className={cn(
+          'flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center',
+          bell.disabled ? 'bg-grey-200' : 'bg-clay-100'
+        )}>
+          <Bell className={cn('w-5 h-5', bell.disabled ? 'text-grey-500' : 'text-clay-600')} />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-medium text-clay-800 truncate">{bell.name}</h4>
+            <h4 className={cn('font-medium truncate', bell.disabled ? 'text-grey-600' : 'text-clay-800')}>{bell.name}</h4>
             {getStatusBadge()}
           </div>
           <div className="flex items-center gap-3 mt-1 text-sm text-clay-500">
-            <span className="font-mono">{bell.code}</span>
+            <span className={cn('font-mono', bell.disabled && 'text-grey-400')}>{bell.code}</span>
             <span className="text-clay-300">|</span>
-            <span>{bell.category}</span>
+            <span className={cn(bell.disabled && 'text-grey-400')}>{bell.category}</span>
           </div>
           {bell.abnormalReason && bell.status !== 'isolated' && (
             <p className="mt-1 text-xs text-cinnabar-500">
