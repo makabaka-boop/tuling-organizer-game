@@ -3,17 +3,19 @@ import type { Bell, IsolationRecord, ScoreResult, Grade, ReviewSummary } from '.
 export function calculateOrderAccuracy(bells: Bell[], queue: string[]): number {
   if (queue.length === 0) return 0;
 
+  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal && !b.needReturn);
+  const sortedExpected = [...queuableBells].sort((a, b) => a.correctPosition - b.correctPosition);
+  const expectedIdOrder = sortedExpected.map(b => b.id);
+
   let correctCount = 0;
 
   for (let i = 0; i < queue.length; i++) {
     const bellId = queue[i];
-    const bell = bells.find(b => b.id === bellId);
-    if (bell && bell.correctPosition === i + 1) {
+    if (expectedIdOrder[i] === bellId) {
       correctCount++;
     }
   }
 
-  const queuableBells = bells.filter(b => !b.disabled && !b.isAbnormal);
   const totalExpected = queuableBells.length;
 
   if (totalExpected === 0) return 100;

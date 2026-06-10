@@ -22,7 +22,7 @@ export const EventToast: React.FC<EventToastProps> = ({ className }) => {
   const eventColors = {
     shuffle: 'bg-gold-500 text-white',
     missing: 'bg-ink-500 text-white',
-    disable: 'bg-grey-600 text-white',
+    disable: 'bg-ink-600 text-white',
     delay: 'bg-clay-600 text-white',
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BellList } from '../components/game/BellList';
 import { SortableQueue } from '../components/game/SortableQueue';
@@ -10,7 +10,8 @@ import { PauseOverlay } from '../components/game/PauseOverlay';
 import { useGameStore } from '../store/useGameStore';
 import { useTimer } from '../hooks/useTimer';
 import { Button } from '../components/ui/Button';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Lock } from 'lucide-react';
+import { getGameProgress, STORAGE_KEYS } from '../utils/storage';
 
 export const GamePage: React.FC = () => {
   const params = useParams<{ levelId: string }>();
@@ -18,12 +19,22 @@ export const GamePage: React.FC = () => {
   const { startGame, isRunning, currentLevel, isPaused, activeEvent, endGame, resetGame, timeRemaining } =
     useGameStore();
   const hasNavigatedRef = useRef(false);
+  const [isLevelUnlocked, setIsLevelUnlocked] = useState<boolean | null>(null);
 
   useTimer();
 
   useEffect(() => {
     const levelId = Number(params.levelId);
-    if (!isNaN(levelId)) {
+    if (isNaN(levelId)) {
+      setIsLevelUnlocked(false);
+      return;
+    }
+
+    const progress = getGameProgress(STORAGE_KEYS.PROGRESS);
+    const unlocked = progress.unlockedLevels.includes(levelId);
+    setIsLevelUnlocked(unlocked);
+
+    if (unlocked) {
       startGame(levelId);
     }
 
@@ -72,9 +83,22 @@ export const GamePage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPaused]);
 
+  if (isLevelUnlocked === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-paper paper-texture">
+        <div className="text-center">
+          <Lock className="w-16 h-16 text-clay-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-clay-800 mb-2">关卡未解锁</h2>
+          <p className="text-clay-600 mb-6">请先完成前序关卡解锁本关</p>
+          <Button onClick={() => navigate('/')}>返回主界面</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentLevel) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-paper">
+      <div className="min-h-screen flex items-center justify-center bg-paper paper-texture">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-clay-400 mx-auto mb-4" />
           <p className="text-clay-600 mb-4">关卡加载失败</p>
@@ -102,21 +126,21 @@ export const GamePage: React.FC = () => {
       <EventToast />
       <PauseOverlay />
 
-      <main className="flex-1 p-4 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
-          <div className="lg:col-span-4 h-full min-h-0">
+      <main className="flex-1 p-4 overflow-auto lg:overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-full lg:h-full">
+          <div className="lg:col-span-4 min-h-[300px] lg:h-full lg:min-h-0">
             <BellList className="h-full" />
           </div>
 
-          <div className="lg:col-span-4 h-full min-h-0">
+          <div className="lg:col-span-4 min-h-[300px] lg:h-full lg:min-h-0">
             <SortableQueue className="h-full" />
           </div>
 
-          <div className="lg:col-span-4 flex flex-col gap-4 h-full min-h-0">
-            <div className="flex-1 min-h-0">
+          <div className="lg:col-span-4 flex flex-col gap-4 min-h-[600px] lg:h-full lg:min-h-0">
+            <div className="flex-1 min-h-[250px] lg:min-h-0">
               <ReturnZone className="h-full" />
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-[250px] lg:min-h-0">
               <IsolationZone className="h-full" />
             </div>
           </div>
